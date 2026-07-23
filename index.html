@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lily Salon - 夢幻星空預約頁面</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body class="p-4 md:p-8 flex justify-center items-center">
+  <div class="w-full max-w-md glass-card rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300">
+        Lily Salon 預約服務
+      </h1>
+      <p class="text-xs text-purple-200/70 mt-1">請依序選擇您的預約需求</p>
+    </div>
+
+    <div class="flex justify-between items-center mb-6 px-2">
+      <div id="step-dots" class="flex gap-1 w-full justify-between"></div>
+    </div>
+
+    <form id="bookingForm" onsubmit="event.preventDefault();" class="space-y-4">
+      <div id="step-1" class="step-content">
+        <h2 class="text-lg font-semibold mb-3 text-pink-200">1. 選擇服務項目</h2>
+        <div class="grid grid-cols-2 gap-3">
+          <button type="button" onclick="selectService('剪髮', 800)" class="service-btn p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-pink-500/20 text-left transition">
+            <div class="font-medium">剪髮服務</div>
+            <div class="text-xs text-pink-300">$800</div>
+          </button>
+          <button type="button" onclick="selectService('染髮', 2500)" class="service-btn p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-pink-500/20 text-left transition">
+            <div class="font-medium">染髮造型</div>
+            <div class="text-xs text-pink-300">$2,500 起</div>
+          </button>
+          <button type="button" onclick="selectService('燙髮', 3000)" class="service-btn p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-pink-500/20 text-left transition">
+            <div class="font-medium">燙髮造型</div>
+            <div class="text-xs text-pink-300">$3,000 起</div>
+          </button>
+          <button type="button" onclick="selectService('護髮理療', 1500)" class="service-btn p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-pink-500/20 text-left transition">
+            <div class="font-medium">深層護髮</div>
+            <div class="text-xs text-pink-300">$1,500</div>
+          </button>
+        </div>
+      </div>
+
+      <div id="step-2" class="step-content hidden">
+        <h2 class="text-lg font-semibold mb-3 text-pink-200">2. 選擇預約時段</h2>
+        <label class="block text-xs mb-1 text-gray-300">選擇日期</label>
+        <input type="date" id="bookingDate" class="w-full bg-white/10 border border-white/20 rounded-xl p-3 text-white mb-3" onchange="loadAvailableSlots()">
+        <label class="block text-xs mb-1 text-gray-300">選擇時間</label>
+        <div id="timeSlots" class="grid grid-cols-3 gap-2 text-xs">
+          <p class="col-span-3 text-gray-400 text-center py-2">請先選擇日期</p>
+        </div>
+      </div>
+
+      <div id="step-3" class="step-content hidden">
+        <h2 class="text-lg font-semibold mb-3 text-pink-200">3. 上傳頭髮現況照片</h2>
+        <p class="text-xs text-gray-300 mb-3">請點擊下方按鈕，開啟手機相冊上傳您目前的頭髮照片：</p>
+        <input type="file" id="hairPhoto" accept="image/*" class="hidden" onchange="handlePhotoUpload(this)">
+        <button type="button" onclick="document.getElementById('hairPhoto').click()" class="w-full py-4 border-2 border-dashed border-pink-300/40 rounded-xl bg-white/5 hover:bg-pink-500/10 text-center transition">
+          <i data-lucide="camera" class="mx-auto mb-1 text-pink-300"></i>
+          <span id="photoStatusText" class="text-sm text-pink-200">點此開啟相冊選擇照片</span>
+        </button>
+        <div id="photoPreviewContainer" class="mt-3 hidden text-center">
+          <img id="photoPreview" class="h-32 mx-auto rounded-lg border border-white/20 object-cover" src="" alt="髮型預覽">
+        </div>
+      </div>
+
+      <div id="step-4" class="step-content hidden">
+        <h2 class="text-lg font-semibold mb-3 text-pink-200">4. 填寫聯絡資料</h2>
+        <div class="space-y-3 text-sm">
+          <div>
+            <label class="block text-xs text-gray-300 mb-1">姓名 *</label>
+            <input type="text" id="custName" placeholder="請輸入姓名" class="w-full bg-white/10 border border-white/20 rounded-xl p-3 text-white">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-300 mb-1">電話 *</label>
+            <input type="tel" id="custPhone" placeholder="0912345678" class="w-full bg-white/10 border border-white/20 rounded-xl p-3 text-white">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-300 mb-1">LINE ID (選填)</label>
+            <input type="text" id="custLine" placeholder="方便以 LINE 聯繫" class="w-full bg-white/10 border border-white/20 rounded-xl p-3 text-white">
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center pt-4 border-t border-white/10 mt-6">
+        <button type="button" id="prevBtn" onclick="changeStep(-1)" class="px-4 py-2 rounded-xl bg-white/10 text-xs hidden">上一步</button>
+        <button type="button" id="nextBtn" onclick="changeStep(1)" class="ml-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-sm font-semibold shadow-lg hover:opacity-90 transition">下一步</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // 初始化 Supabase
+    const supabaseUrl = 'https://wuzqhxfsinfmufwojsrb.supabase.co';
+    const supabaseKey = 'YOUR_SUPABASE_ANON_KEY'; // 網頁端讀取
+    let _supabase = null;
+    if (window.supabase) {
+      _supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    }
+
+    let currentStep = 1;
+    let formData = { service: '', price: 0, date: '', time: '', photoUrl: '', name: '', phone: '', line: '' };
+
+    function renderDots() {
+      const container = document.getElementById('step-dots');
+      container.innerHTML = '';
+      for(let i = 1; i <= 4; i++) {
+        const dot = document.createElement('div');
+        dot.className = `h-1.5 flex-1 rounded-full transition-all duration-300 ${i <= currentStep ? 'bg-pink-400' : 'bg-white/10'}`;
+        container.appendChild(dot);
+      }
+    }
+
+    function changeStep(delta) {
+      if (delta === 1 && !validateStep(currentStep)) return;
+      document.getElementById(`step-${currentStep}`).classList.add('hidden');
+      currentStep += delta;
+      
+      if (currentStep > 4) {
+        submitBooking();
+        return;
+      }
+      
+      document.getElementById(`step-${currentStep}`).classList.remove('hidden');
+      document.getElementById('prevBtn').classList.toggle('hidden', currentStep === 1);
+      document.getElementById('nextBtn').innerText = currentStep === 4 ? '確認預約' : '下一步';
+      renderDots();
+    }
+
+    function selectService(name, price) {
+      formData.service = name;
+      formData.price = price;
+      changeStep(1);
+    }
+
+    function loadAvailableSlots() {
+      const date = document.getElementById('bookingDate').value;
+      formData.date = date;
+      const slotsContainer = document.getElementById('timeSlots');
+      const times = ['10:00', '11:30', '14:00', '15:30', '17:00', '18:30'];
+      
+      slotsContainer.innerHTML = times.map(t => 
+        `<button type="button" onclick="selectTime('${t}', this)" class="time-btn p-2 rounded-lg border border-white/10 bg-white/5 hover:bg-pink-500/20 text-center transition">${t}</button>`
+      ).join('');
+    }
+
+    function selectTime(time, btn) {
+      document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('bg-pink-500', 'border-pink-300'));
+      btn.classList.add('bg-pink-500', 'border-pink-300');
+      formData.time = time;
+    }
+
+    async function handlePhotoUpload(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      document.getElementById('photoStatusText').innerText = '正在上傳照片中...';
+
+      if (_supabase) {
+        const fileName = `${Date.now()}_${file.name}`;
+        const { data, error } = await _supabase.storage.from('hair-photos').upload(fileName, file);
+        if (error) {
+          alert('圖片上傳失敗：' + error.message);
+          document.getElementById('photoStatusText').innerText = '點此開啟相冊選擇照片';
+          return;
+        }
+        const { data: publicUrlData } = _supabase.storage.from('hair-photos').getPublicUrl(fileName);
+        formData.photoUrl = publicUrlData.publicUrl;
+      } else {
+        formData.photoUrl = URL.createObjectURL(file);
+      }
+
+      document.getElementById('photoStatusText').innerText = '照片已上傳成功！';
+      document.getElementById('photoPreview').src = formData.photoUrl;
+      document.getElementById('photoPreviewContainer').classList.remove('hidden');
+    }
+
+    function validateStep(step) {
+      if (step === 1 && !formData.service) { alert('請選擇服務項目'); return false; }
+      if (step === 2 && (!formData.date || !formData.time)) { alert('請選擇日期與時間'); return false; }
+      if (step === 4) {
+        formData.name = document.getElementById('custName').value;
+        formData.phone = document.getElementById('custPhone').value;
+        formData.line = document.getElementById('custLine').value;
+        if (!formData.name || !formData.phone) { alert('請填寫姓名與電話'); return false; }
+      }
+      return true;
+    }
+
+    async function submitBooking() {
+      alert('預約成功！我們將儘快與您聯繫確認。');
+      location.reload();
+    }
+
+    lucide.createIcons();
+    renderDots();
+  </script>
+</body>
+</html>
