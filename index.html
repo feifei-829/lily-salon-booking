@@ -8,6 +8,9 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
+    *, ::before, ::after {
+      box-sizing: border-box;
+    }
     body {
       background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
       color: #f8fafc;
@@ -19,259 +22,292 @@
       backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
+    input, select, textarea {
+      max-width: 100%;
+    }
   </style>
 </head>
 <body class="p-4 md:p-8 flex justify-center items-center">
-  <div class="w-full max-w-md glass-card rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+  <!-- 固定最小高度，防止切換步驟時畫面上下跳動 -->
+  <div class="w-full max-w-md glass-card rounded-3xl p-6 shadow-2xl relative overflow-hidden min-h-[580px] flex flex-col justify-between transition-all duration-300">
     
-    <!-- 標頭 -->
-    <div class="text-center mb-4">
-      <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300">
-        Lily Salon 預約服務
-      </h1>
-      <p id="step-desc" class="text-xs text-purple-200/70 mt-1">歡迎預約</p>
+    <div>
+      <!-- 標頭 -->
+      <div class="text-center mb-4">
+        <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300">
+          Lily Salon 預約服務
+        </h1>
+        <p id="step-desc" class="text-xs text-purple-200/70 mt-1">歡迎預約</p>
+      </div>
+
+      <!-- 進度條 -->
+      <div id="progress-bar" class="hidden mb-6 px-1">
+        <div id="step-dots" class="flex gap-1 w-full justify-between"></div>
+      </div>
+
+      <form id="bookingForm" onsubmit="event.preventDefault();" class="space-y-4">
+        
+        <!-- 首頁 Landing (雙選項) -->
+        <div id="step-0" class="step-content text-center py-6 space-y-6">
+          <p class="text-sm text-gray-300 leading-relaxed">歡迎來到 Lily Salon<br>請選擇您需要的服務項目：</p>
+          <div class="space-y-3">
+            <button type="button" onclick="changeStep(1)" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 font-semibold shadow-lg hover:opacity-90 transition text-sm">
+              ✨ 開始線上預約
+            </button>
+            <button type="button" onclick="openQueryModal()" class="w-full py-3.5 rounded-xl border border-white/20 bg-white/10 font-semibold hover:bg-white/20 transition text-sm text-purple-200">
+              🔍 查詢預約紀錄
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 1: 預約須知 -->
+        <div id="step-1" class="step-content hidden">
+          <h2 class="text-lg font-semibold mb-3 text-pink-200">Step 1. 預約須知</h2>
+          <div class="p-4 bg-black/30 rounded-xl text-xs space-y-2 text-gray-200 mb-4 leading-relaxed">
+            <p>• 燙染為化學處理，在意髮質建議搭配護髮。</p>
+            <p>• 髮型與髮色需現場看髮況，網路只提供報價參考。</p>
+            <p>• 目前為一人服務制，操作時間可能較長。</p>
+            <p>• 若需取消或改期，請至少前一天告知。</p>
+            <p>• 預約保留15分鐘，遲到請透過 LINE 告知。</p>
+            <p>• 若要取消、更改日期與時段，可回到預約首頁更改。</p>
+          </div>
+          <label class="flex items-center gap-2 cursor-pointer text-xs text-pink-200">
+            <input type="checkbox" id="agreeNotice" class="accent-pink-500 w-4 h-4">
+            <span>我已清楚閱讀並同意以上預約須知</span>
+          </label>
+        </div>
+
+        <!-- Step 2: 選擇服務項目 -->
+        <div id="step-2" class="step-content hidden">
+          <h2 class="text-lg font-semibold mb-1 text-pink-200">Step 2. 選擇服務項目</h2>
+          <p class="text-xs text-gray-300 mb-3">可複選項目，系統將自動估算所需時間：</p>
+          <div class="space-y-2 text-sm">
+            <label class="flex items-center justify-between p-2.5 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" value="頭皮護理" data-hours="1" onchange="toggleService(this)" class="accent-pink-500 w-4 h-4">
+                <span>頭皮護理</span>
+              </div>
+              <span class="text-xs text-purple-300">1 小時</span>
+            </label>
+            <label class="flex items-center justify-between p-2.5 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" value="髮質修護" data-hours="1" onchange="toggleService(this)" class="accent-pink-500 w-4 h-4">
+                <span>髮質修護</span>
+              </div>
+              <span class="text-xs text-purple-300">1 小時</span>
+            </label>
+            <label class="flex items-center justify-between p-2.5 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" value="剪髮設計" data-hours="1" onchange="toggleService(this)" class="accent-pink-500 w-4 h-4">
+                <span>剪髮設計</span>
+              </div>
+              <span class="text-xs text-purple-300">1 小時</span>
+            </label>
+            <label class="flex items-center justify-between p-2.5 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" value="燙髮設計" data-hours="4" onchange="toggleService(this)" class="accent-pink-500 w-4 h-4">
+                <span>燙髮設計</span>
+              </div>
+              <span class="text-xs text-purple-300">4 小時</span>
+            </label>
+            <label class="flex items-center justify-between p-2.5 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" value="局部燙髮" data-hours="2" onchange="toggleService(this)" class="accent-pink-500 w-4 h-4">
+                <span>局部燙髮</span>
+              </div>
+              <span class="text-xs text-purple-300">2 小時</span>
+            </label>
+            <label class="flex items-center justify-between p-2.5 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" value="染髮設計" data-hours="3" onchange="toggleService(this)" class="accent-pink-500 w-4 h-4">
+                <span>染髮設計</span>
+              </div>
+              <span class="text-xs text-purple-300">3 小時</span>
+            </label>
+            <label class="flex items-center justify-between p-2.5 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" value="漂髮設計" data-hours="3" onchange="toggleService(this)" class="accent-pink-500 w-4 h-4">
+                <span>漂髮設計</span>
+              </div>
+              <span class="text-xs text-purple-300">3 小時</span>
+            </label>
+          </div>
+          <div class="mt-3 p-2.5 bg-pink-500/10 border border-pink-500/30 rounded-xl text-xs text-pink-200">
+            預估總時長：<span id="totalHoursText" class="font-bold text-pink-300 text-sm">0</span> 小時
+          </div>
+        </div>
+
+        <!-- Step 3: 日期與時段 (修復防溢出) -->
+        <div id="step-3" class="step-content hidden">
+          <h2 class="text-lg font-semibold mb-3 text-pink-200">Step 3. 選擇預約日期與時間</h2>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs text-gray-300 mb-1">選擇日期：</label>
+              <input type="date" id="bookingDate" class="w-full box-border bg-white/10 border border-white/20 rounded-xl p-3 text-white appearance-none" onchange="renderTimeSlots()">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-300 mb-1">開放時段 (12:00 - 19:00)：</label>
+              <div id="timeSlots" class="grid grid-cols-3 gap-2 text-xs">
+                <p class="col-span-3 text-gray-400 text-center py-2">請先選擇日期</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: 基本資料 (LINE ID 說明優化 + 防溢出) -->
+        <div id="step-4" class="step-content hidden">
+          <h2 class="text-lg font-semibold mb-3 text-pink-200">Step 4. 填寫基本資料</h2>
+          <div class="space-y-3 text-sm">
+            <div>
+              <label class="block text-xs text-gray-300 mb-1">姓名 *</label>
+              <input type="text" id="custName" placeholder="請輸入姓名" class="w-full bg-white/10 border border-white/20 rounded-xl p-2.5 text-white">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-300 mb-1">電話 *</label>
+              <input type="tel" id="custPhone" placeholder="0912345678" class="w-full bg-white/10 border border-white/20 rounded-xl p-2.5 text-white">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-300 mb-1">LINE ID</label>
+              <input type="text" id="custLine" placeholder="方便 Lily 主動加 LINE 與您確認細節 (選填)" class="w-full bg-white/10 border border-white/20 rounded-xl p-2.5 text-white text-xs">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-300 mb-1">生日 (發送專屬壽星優惠) *</label>
+              <input type="date" id="custBirthday" class="w-full box-border bg-white/10 border border-white/20 rounded-xl p-2.5 text-white appearance-none">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-300 mb-1">是否為第一次到店？ *</label>
+              <div class="flex gap-4 mt-1">
+                <label class="flex items-center gap-1.5 cursor-pointer text-xs">
+                  <input type="radio" name="firstVisit" value="是，第一次到店" class="accent-pink-500"> 是，第一次到店
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer text-xs">
+                  <input type="radio" name="firstVisit" value="否，之前來過" class="accent-pink-500"> 否，之前來過
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 5: 髮況資料 (改為優雅的膠囊按鈕選單) -->
+        <div id="step-5" class="step-content hidden">
+          <h2 class="text-lg font-semibold mb-3 text-pink-200">Step 5. 髮況資料</h2>
+          <div class="space-y-4 text-xs">
+            <div>
+              <label class="block text-gray-200 mb-2 font-medium">目前髮長：</label>
+              <div class="grid grid-cols-2 gap-2" id="hairLengthOptions">
+                <button type="button" onclick="selectHairLength('男生', this)" class="hair-btn p-2.5 border border-white/10 bg-white/5 rounded-xl text-center hover:bg-pink-500/20 transition">男生</button>
+                <button type="button" onclick="selectHairLength('短髮（耳下到肩膀）', this)" class="hair-btn p-2.5 border border-white/10 bg-white/5 rounded-xl text-center hover:bg-pink-500/20 transition">短髮 (耳下~肩膀)</button>
+                <button type="button" onclick="selectHairLength('中長髮（肩下到胸上）', this)" class="hair-btn p-2.5 border border-white/10 bg-white/5 rounded-xl text-center hover:bg-pink-500/20 transition">中長髮 (肩下~胸上)</button>
+                <button type="button" onclick="selectHairLength('長髮（及胸、胸口）', this)" class="hair-btn p-2.5 border border-white/10 bg-white/5 rounded-xl text-center hover:bg-pink-500/20 transition">長髮 (及胸)</button>
+                <button type="button" onclick="selectHairLength('特長（胸下）', this)" class="hair-btn col-span-2 p-2.5 border border-white/10 bg-white/5 rounded-xl text-center hover:bg-pink-500/20 transition">特長 (胸下)</button>
+              </div>
+            </div>
+            <div>
+              <label class="block text-gray-200 mb-1.5 font-medium">有染黑過嗎？</label>
+              <div class="space-y-1.5">
+                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="dyedBlack" value="無染黑過" class="accent-pink-500"> 無</label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="dyedBlack" value="自行染黑" class="accent-pink-500"> 自行染黑</label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="dyedBlack" value="髮廊染黑" class="accent-pink-500"> 髮廊染黑</label>
+              </div>
+            </div>
+            <div>
+              <label class="block text-gray-200 mb-1.5 font-medium">有漂髮過嗎？</label>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="bleached" value="無漂過" class="accent-pink-500"> 無</label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="bleached" value="有漂過" class="accent-pink-500"> 有漂過</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 6: 上傳照片 -->
+        <div id="step-6" class="step-content hidden">
+          <h2 class="text-lg font-semibold mb-3 text-pink-200">Step 6. 上傳照片</h2>
+          <div class="space-y-4 text-xs">
+            <div>
+              <label class="block text-gray-200 mb-1">1. 目前髮況照片 (點選相冊可多選，最多 3 張)</label>
+              <input type="file" id="currentHairPhotos" multiple accept="image/*" class="w-full bg-white/10 border border-white/20 rounded-xl p-2 text-white">
+            </div>
+            <div>
+              <label class="block text-gray-200 mb-1">2. 參考圖片 (點選相冊可多選，最多 5 張)</label>
+              <input type="file" id="refHairPhotos" multiple accept="image/*" class="w-full bg-white/10 border border-white/20 rounded-xl p-2 text-white">
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 7: 讓 Lily 更了解你 (溫馨文案與 3 選項升級) -->
+        <div id="step-7" class="step-content hidden">
+          <h2 class="text-lg font-semibold mb-1 text-pink-200">Step 7. 讓 Lily 了解你的偏好</h2>
+          <p class="text-xs text-gray-300 mb-3">貼心的小細節，只為給您最舒服的放獨享時間：</p>
+          <div class="space-y-3 text-xs">
+            <div>
+              <label class="block text-gray-200 mb-1">目前頭髮最困擾您的地方？</label>
+              <textarea id="troublesText" rows="2" placeholder="例如：頭髮毛躁、容易頭皮出油、扁塌..." class="w-full bg-white/10 border border-white/20 rounded-xl p-2 text-white"></textarea>
+            </div>
+            <div>
+              <label class="block text-gray-200 mb-1.5 font-medium">今天的服務聊天氛圍：</label>
+              <div class="space-y-2">
+                <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg bg-white/5 border border-white/10">
+                  <input type="radio" name="chatPref" value="偏好安靜（想好好休息放鬆）" class="accent-pink-500">
+                  <span>🌸 偏好安靜（我是 I 人，想好好放鬆休息）</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg bg-white/5 border border-white/10">
+                  <input type="radio" name="chatPref" value="熱情聊天（歡迎跟我互動）" class="accent-pink-500">
+                  <span>💬 熱情聊天（我是 E 人，歡迎跟我聊天互動）</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg bg-white/5 border border-white/10">
+                  <input type="radio" name="chatPref" value="順其自然（當天狀況都可以）" class="accent-pink-500">
+                  <span>☕ 順其自然（看當天心情與狀況，都可以～）</span>
+                </label>
+              </div>
+            </div>
+            <div>
+              <label class="block text-gray-200 mb-1">服務過程中有無特別在意的事項？</label>
+              <textarea id="noticeText" rows="2" placeholder="例如：洗頭水溫偏熱、力道輕柔、對藥水較敏感..." class="w-full bg-white/10 border border-white/20 rounded-xl p-2 text-white"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 8: 確認預約與送出 -->
+        <div id="step-8" class="step-content hidden">
+          <h2 class="text-lg font-semibold mb-2 text-pink-200">Step 8. 確認預約內容</h2>
+          <div id="summaryCard" class="p-3 bg-pink-500/10 border border-pink-500/30 rounded-xl text-xs space-y-1.5 mb-2"></div>
+          <p class="text-[10px] text-pink-300/80 mb-4">* 送出後將由 Lily 透過 LINE 與您確認詳細預約資訊。</p>
+        </div>
+
+        <!-- 預約成功完成頁 -->
+        <div id="step-done" class="step-content hidden text-center py-6 space-y-4">
+          <div class="w-16 h-16 bg-pink-500/20 text-pink-300 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">✓</div>
+          <h2 class="text-xl font-bold text-pink-200">預約申請已成功送出！</h2>
+          <p class="text-xs text-gray-300 leading-relaxed">感謝您的預約！Lily 會盡快核對時間並聯絡您。</p>
+          <a href="https://line.me" id="backToLineBtn" class="inline-block w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold text-sm transition text-white shadow-lg">
+            返回 Lily 的 LINE 官方帳號
+          </a>
+        </div>
+
+      </form>
     </div>
 
-    <!-- 進度條 -->
-    <div id="progress-bar" class="hidden mb-6 px-1">
-      <div id="step-dots" class="flex gap-1 w-full justify-between"></div>
+    <!-- 下方導覽按鈕 -->
+    <div id="navButtons" class="flex justify-between items-center pt-4 border-t border-white/10 mt-4 hidden">
+      <button type="button" id="prevBtn" onclick="changeStep(-1)" class="px-4 py-2 rounded-xl bg-white/10 text-xs">上一步</button>
+      <button type="button" id="nextBtn" onclick="changeStep(1)" class="ml-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-sm font-semibold shadow-lg transition">下一步</button>
     </div>
 
-    <form id="bookingForm" onsubmit="event.preventDefault();" class="space-y-4">
-      
-      <!-- 首頁 Landing -->
-      <div id="step-0" class="step-content text-center py-4">
-        <p class="text-sm text-gray-300 mb-6">歡迎來到 Lily Salon，請點擊下方按鈕開始預約流程。</p>
-        <button type="button" onclick="changeStep(1)" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 font-semibold shadow-lg hover:opacity-90 transition">
-          開始預約
-        </button>
-      </div>
+  </div>
 
-      <!-- Step 1: 預約須知（已移除訂金相關字眼） -->
-      <div id="step-1" class="step-content hidden">
-        <h2 class="text-lg font-semibold mb-3 text-pink-200">Step 1. 預約須知</h2>
-        <div class="p-4 bg-black/30 rounded-xl text-xs space-y-2 text-gray-200 mb-4 leading-relaxed">
-          <p>• 燙染為化學處理，在意髮質建議搭配護髮。</p>
-          <p>• 髮型與髮色需現場看髮況，網路只提供報價參考。</p>
-          <p>• 目前為一人服務制，操作時間可能較長。</p>
-          <p>• 若需取消或改期，請至少前一天告知。</p>
-          <p>• 預約保留15分鐘，遲到請透過 LINE 告知。</p>
-          <p>• 若要取消、更改日期與時段、服務項目，可回到預約首頁更改。</p>
-        </div>
-        <label class="flex items-center gap-2 cursor-pointer text-xs text-pink-200">
-          <input type="checkbox" id="agreeNotice" class="accent-pink-500 w-4 h-4">
-          <span>我已清楚閱讀並同意以上預約須知</span>
-        </label>
+  <!-- 查詢預約紀錄彈窗 -->
+  <div id="queryModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="glass-card rounded-2xl p-6 w-full max-w-xs space-y-4 text-center">
+      <h3 class="text-lg font-bold text-pink-200">🔍 查詢預約紀錄</h3>
+      <p class="text-xs text-gray-300">請輸入預約時填寫的手機號碼：</p>
+      <input type="tel" id="queryPhone" placeholder="0912345678" class="w-full bg-white/10 border border-white/20 rounded-xl p-2.5 text-white text-center">
+      <div id="queryResult" class="text-xs text-pink-300 hidden"></div>
+      <div class="flex gap-2 pt-2">
+        <button type="button" onclick="closeQueryModal()" class="flex-1 py-2 rounded-xl bg-white/10 text-xs">取消</button>
+        <button type="button" onclick="searchBooking()" class="flex-1 py-2 rounded-xl bg-pink-500 text-xs font-semibold">查詢</button>
       </div>
-
-      <!-- Step 2: 選擇服務項目 -->
-      <div id="step-2" class="step-content hidden">
-        <h2 class="text-lg font-semibold mb-1 text-pink-200">Step 2. 選擇服務項目</h2>
-        <p class="text-xs text-gray-300 mb-3">可複選項目，系統將自動估算所需時間：</p>
-        <div class="space-y-2 text-sm">
-          <label class="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10">
-            <div class="flex items-center gap-2">
-              <input type="checkbox" value="頭皮護理" data-hours="1" onchange="toggleService(this)" class="accent-pink-500 w-4 h-4">
-              <span>頭皮護理</span>
-            </div>
-            <span class="text-xs text-purple-300">1 小時</span>
-          </label>
-          <label class="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10">
-            <div class="flex items-center gap-2">
-              <input type="checkbox" value="髮質修護" data-hours="1" onchange="toggleService(this)" class="accent-pink-500 w-4 h-4">
-              <span>髮質修護</span>
-            </div>
-            <span class="text-xs text-purple-300">1 小時</span>
-          </label>
-          <label class="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10">
-            <div class="flex items-center gap-2">
-              <input type="checkbox" value="剪髮設計" data-hours="1" onchange="toggleService(this)" class="accent-pink-500 w-4 h-4">
-              <span>剪髮設計</span>
-            </div>
-            <span class="text-xs text-purple-300">1 小時</span>
-          </label>
-          <label class="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10">
-            <div class="flex items-center gap-2">
-              <input type="checkbox" value="燙髮設計" data-hours="4" onchange="toggleService(this)" class="accent-pink-500 w-4 h-4">
-              <span>燙髮設計</span>
-            </div>
-            <span class="text-xs text-purple-300">4 小時</span>
-          </label>
-          <label class="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10">
-            <div class="flex items-center gap-2">
-              <input type="checkbox" value="局部燙髮" data-hours="2" onchange="toggleService(this)" class="accent-pink-500 w-4 h-4">
-              <span>局部燙髮</span>
-            </div>
-            <span class="text-xs text-purple-300">2 小時</span>
-          </label>
-          <label class="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10">
-            <div class="flex items-center gap-2">
-              <input type="checkbox" value="染髮設計" data-hours="3" onchange="toggleService(this)" class="accent-pink-500 w-4 h-4">
-              <span>染髮設計</span>
-            </div>
-            <span class="text-xs text-purple-300">3 小時</span>
-          </label>
-          <label class="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10">
-            <div class="flex items-center gap-2">
-              <input type="checkbox" value="漂髮設計" data-hours="3" onchange="toggleService(this)" class="accent-pink-500 w-4 h-4">
-              <span>漂髮設計</span>
-            </div>
-            <span class="text-xs text-purple-300">3 小時</span>
-          </label>
-        </div>
-        <div class="mt-3 p-3 bg-pink-500/10 border border-pink-500/30 rounded-xl text-xs text-pink-200">
-          預估總時長：<span id="totalHoursText" class="font-bold text-pink-300 text-sm">0</span> 小時
-        </div>
-      </div>
-
-      <!-- Step 3: 日期與時段 -->
-      <div id="step-3" class="step-content hidden">
-        <h2 class="text-lg font-semibold mb-3 text-pink-200">Step 3. 選擇預約日期與時間</h2>
-        <div class="space-y-3">
-          <div>
-            <label class="block text-xs text-gray-300 mb-1">選擇日期：</label>
-            <input type="date" id="bookingDate" class="w-full bg-white/10 border border-white/20 rounded-xl p-3 text-white" onchange="renderTimeSlots()">
-          </div>
-          <div>
-            <label class="block text-xs text-gray-300 mb-1">開放時段 (12:00 - 19:00)：</label>
-            <div id="timeSlots" class="grid grid-cols-3 gap-2 text-xs">
-              <p class="col-span-3 text-gray-400 text-center py-2">請先選擇日期</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 4: 基本資料 -->
-      <div id="step-4" class="step-content hidden">
-        <h2 class="text-lg font-semibold mb-3 text-pink-200">Step 4. 填寫基本資料</h2>
-        <div class="space-y-3 text-sm">
-          <div>
-            <label class="block text-xs text-gray-300 mb-1">姓名 *</label>
-            <input type="text" id="custName" placeholder="請輸入姓名" class="w-full bg-white/10 border border-white/20 rounded-xl p-2.5 text-white">
-          </div>
-          <div>
-            <label class="block text-xs text-gray-300 mb-1">電話 *</label>
-            <input type="tel" id="custPhone" placeholder="0912345678" class="w-full bg-white/10 border border-white/20 rounded-xl p-2.5 text-white">
-          </div>
-          <div>
-            <label class="block text-xs text-gray-300 mb-1">LINE ID</label>
-            <input type="text" id="custLine" placeholder="方便以 LINE 聯繫" class="w-full bg-white/10 border border-white/20 rounded-xl p-2.5 text-white">
-          </div>
-          <div>
-            <label class="block text-xs text-gray-300 mb-1">生日 (發送專屬壽星優惠) *</label>
-            <input type="date" id="custBirthday" class="w-full bg-white/10 border border-white/20 rounded-xl p-2.5 text-white">
-          </div>
-          <div>
-            <label class="block text-xs text-gray-300 mb-1">是否為第一次到店？ *</label>
-            <div class="flex gap-4 mt-1">
-              <label class="flex items-center gap-1.5 cursor-pointer text-xs">
-                <input type="radio" name="firstVisit" value="是，第一次到店" class="accent-pink-500"> 是，第一次到店
-              </label>
-              <label class="flex items-center gap-1.5 cursor-pointer text-xs">
-                <input type="radio" name="firstVisit" value="否，之前來過" class="accent-pink-500"> 否，之前來過
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 5: 髮況資料 -->
-      <div id="step-5" class="step-content hidden">
-        <h2 class="text-lg font-semibold mb-3 text-pink-200">Step 5. 髮況資料</h2>
-        <div class="space-y-4 text-xs">
-          <div>
-            <label class="block text-gray-200 mb-1.5 font-medium">目前髮長：</label>
-            <select id="hairLengthSelect" class="w-full bg-white/10 border border-white/20 rounded-xl p-2.5 text-white">
-              <option value="" class="bg-slate-900">請選擇髮長</option>
-              <option value="男生" class="bg-slate-900">男生</option>
-              <option value="短髮（耳下到肩膀）" class="bg-slate-900">短髮（耳下到肩膀）</option>
-              <option value="中長髮（肩下到胸上）" class="bg-slate-900">中長髮（肩下到胸上）</option>
-              <option value="長髮（及胸、胸口）" class="bg-slate-900">長髮（及胸、胸口）</option>
-              <option value="特長（胸下）" class="bg-slate-900">特長（胸下）</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-gray-200 mb-1.5 font-medium">有染黑過嗎？</label>
-            <div class="space-y-1.5">
-              <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="dyedBlack" value="無染黑過" class="accent-pink-500"> 無</label>
-              <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="dyedBlack" value="自行染黑" class="accent-pink-500"> 自行染黑</label>
-              <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="dyedBlack" value="髮廊染黑" class="accent-pink-500"> 髮廊染黑</label>
-            </div>
-          </div>
-          <div>
-            <label class="block text-gray-200 mb-1.5 font-medium">有漂髮過嗎？</label>
-            <div class="flex gap-4">
-              <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="bleached" value="無漂過" class="accent-pink-500"> 無</label>
-              <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="bleached" value="有漂過" class="accent-pink-500"> 有漂過</label>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 6: 上傳照片 -->
-      <div id="step-6" class="step-content hidden">
-        <h2 class="text-lg font-semibold mb-3 text-pink-200">Step 6. 上傳照片</h2>
-        <div class="space-y-4 text-xs">
-          <div>
-            <label class="block text-gray-200 mb-1">1. 目前髮況照片 (點選相冊可多選，最多 3 張)</label>
-            <input type="file" id="currentHairPhotos" multiple accept="image/*" class="w-full bg-white/10 border border-white/20 rounded-xl p-2 text-white">
-          </div>
-          <div>
-            <label class="block text-gray-200 mb-1">2. 參考圖片 (點選相冊可多選，最多 5 張)</label>
-            <input type="file" id="refHairPhotos" multiple accept="image/*" class="w-full bg-white/10 border border-white/20 rounded-xl p-2 text-white">
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 7: 讓 Lily 更了解你 -->
-      <div id="step-7" class="step-content hidden">
-        <h2 class="text-lg font-semibold mb-3 text-pink-200">Step 7. 讓 Lily 更了解你</h2>
-        <div class="space-y-3 text-xs">
-          <div>
-            <label class="block text-gray-200 mb-1">目前想改善的困擾？</label>
-            <textarea id="troublesText" rows="2" placeholder="例如：毛躁、頭皮容易出油..." class="w-full bg-white/10 border border-white/20 rounded-xl p-2 text-white"></textarea>
-          </div>
-          <div>
-            <label class="block text-gray-200 mb-1">聊天頻率偏好：</label>
-            <div class="space-y-1.5">
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="radio" name="chatPref" value="我是I人，請減少聊天頻率" class="accent-pink-500"> 我是 I 人，請減少聊天頻率
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="radio" name="chatPref" value="我是E人，可以跟我聊天互動" class="accent-pink-500"> 我是 E 人，可以跟我聊天互動
-              </label>
-            </div>
-          </div>
-          <div>
-            <label class="block text-gray-200 mb-1">服務中會特別在意的地方？</label>
-            <textarea id="noticeText" rows="2" placeholder="例如：洗髮水溫偏好、動作輕柔..." class="w-full bg-white/10 border border-white/20 rounded-xl p-2 text-white"></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 8: 確認預約與送出 -->
-      <div id="step-8" class="step-content hidden">
-        <h2 class="text-lg font-semibold mb-2 text-pink-200">Step 8. 確認預約內容</h2>
-        <div id="summaryCard" class="p-3 bg-pink-500/10 border border-pink-500/30 rounded-xl text-xs space-y-1.5 mb-2"></div>
-        <p class="text-[10px] text-pink-300/80 mb-4">* 送出後將由 Lily 透過 LINE 與您確認詳細預約資訊。</p>
-      </div>
-
-      <!-- 預約成功完成頁 -->
-      <div id="step-done" class="step-content hidden text-center py-6 space-y-4">
-        <div class="w-16 h-16 bg-pink-500/20 text-pink-300 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">✓</div>
-        <h2 class="text-xl font-bold text-pink-200">預約申請已成功送出！</h2>
-        <p class="text-xs text-gray-300 leading-relaxed">感謝您的預約！Lily 會盡快核對時間並聯絡您。</p>
-        <a href="https://line.me" id="backToLineBtn" class="inline-block w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold text-sm transition text-white shadow-lg">
-          返回 Lily 的 LINE 官方帳號
-        </a>
-      </div>
-
-      <!-- 下方導覽按鈕 -->
-      <div id="navButtons" class="flex justify-between items-center pt-4 border-t border-white/10 mt-6 hidden">
-        <button type="button" id="prevBtn" onclick="changeStep(-1)" class="px-4 py-2 rounded-xl bg-white/10 text-xs">上一步</button>
-        <button type="button" id="nextBtn" onclick="changeStep(1)" class="ml-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-sm font-semibold shadow-lg transition">下一步</button>
-      </div>
-    </form>
+    </div>
   </div>
 
   <script>
@@ -332,6 +368,16 @@
       document.getElementById('totalHoursText').innerText = formData.totalHours;
     }
 
+    function selectHairLength(val, btn) {
+      formData.hairLength = val;
+      document.querySelectorAll('.hair-btn').forEach(b => {
+        b.classList.remove('bg-pink-500', 'border-pink-300');
+        b.classList.add('bg-white/5', 'border-white/10');
+      });
+      btn.classList.remove('bg-white/5', 'border-white/10');
+      btn.classList.add('bg-pink-500', 'border-pink-300');
+    }
+
     function renderTimeSlots() {
       formData.date = document.getElementById('bookingDate').value;
       const slotsContainer = document.getElementById('timeSlots');
@@ -354,6 +400,7 @@
       if (step === 4) {
         formData.name = document.getElementById('custName').value;
         formData.phone = document.getElementById('custPhone').value;
+        formData.line = document.getElementById('custLine').value;
         formData.birthday = document.getElementById('custBirthday').value;
         const firstVisitEl = document.querySelector('input[name="firstVisit"]:checked');
         if (!formData.name || !formData.phone || !formData.birthday || !firstVisitEl) {
@@ -362,11 +409,10 @@
         formData.firstVisit = firstVisitEl.value;
       }
       if (step === 5) {
-        formData.hairLength = document.getElementById('hairLengthSelect').value;
         const dyedBlackEl = document.querySelector('input[name="dyedBlack"]:checked');
         const bleachedEl = document.querySelector('input[name="bleached"]:checked');
         if (!formData.hairLength || !dyedBlackEl || !bleachedEl) {
-          alert('請完整勾選髮況資料'); return false;
+          alert('請選擇髮長並完整勾選染黑/漂髮紀錄'); return false;
         }
         formData.dyedBlack = dyedBlackEl.value;
         formData.bleached = bleachedEl.value;
@@ -391,11 +437,27 @@
         <p>• 預約時間：${formData.date} ${formData.time}</p>
         <p>• 顧客姓名：${formData.name} (${formData.firstVisit})</p>
         <p>• 聯絡電話：${formData.phone}</p>
+        <p>• LINE ID：${formData.line || '未填寫'}</p>
         <p>• 生日：${formData.birthday}</p>
         <p>• 目前髮長：${formData.hairLength}</p>
         <p>• 染黑/漂髮：${formData.dyedBlack} / ${formData.bleached}</p>
         <p>• 聊天偏好：${formData.chatPref}</p>
       `;
+    }
+
+    function openQueryModal() {
+      document.getElementById('queryModal').classList.remove('hidden');
+    }
+    function closeQueryModal() {
+      document.getElementById('queryModal').classList.add('hidden');
+      document.getElementById('queryResult').classList.add('hidden');
+    }
+    function searchBooking() {
+      const phone = document.getElementById('queryPhone').value;
+      const resEl = document.getElementById('queryResult');
+      if (!phone) { alert('請輸入電話號碼'); return; }
+      resEl.innerText = `目前已收到您的查詢請求，專人核對中。`;
+      resEl.classList.remove('hidden');
     }
   </script>
 </body>
