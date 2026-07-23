@@ -5,39 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lily莉莉の預約系統</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- 引入日系明體字型 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Noto Serif TC', serif;
-      background: radial-gradient(circle at 50% 20%, #fdf2f8 0%, #f3e8ff 50%, #fae8ff 100%);
+      /* 完美套用你 UI 圖裡的粉紫夢幻雲霧背景 */
+      background: radial-gradient(circle at 50% 30%, #fdf2f8 0%, #f3e8ff 45%, #fae8ff 80%, #f5d0fe 100%),
+                  url('https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&q=80&w=1000') center/cover no-repeat;
+      background-blend-mode: soft-light;
       color: #581c87;
       min-height: 100vh;
     }
-    /* 夢幻卡片邊框與玻璃質感 */
+    /* 夢幻日系花紋卡片 */
     .magic-card {
-      background: rgba(255, 255, 255, 0.75);
+      background: rgba(255, 255, 255, 0.78);
       backdrop-filter: blur(16px);
       border: 2px solid #f0abfc;
-      box-shadow: 0 10px 30px rgba(216, 180, 254, 0.35), inset 0 0 15px rgba(255, 255, 255, 0.8);
+      box-shadow: 0 12px 35px rgba(216, 180, 254, 0.45), inset 0 0 15px rgba(255, 255, 255, 0.9);
     }
     .magic-border-inner {
       border: 1px dashed #d8b4fe;
     }
-    /* 主按鈕日系漸層光暈 */
+    /* 日系星芒漸層主按鈕 */
     .btn-magic-primary {
-      background: linear-gradient(135deg, #f472b6 0%, #a855f7 50%, #818cf8 100%);
-      box-shadow: 0 4px 15px rgba(217, 70, 239, 0.4);
+      background: linear-gradient(135deg, #f472b6 0%, #c084fc 50%, #818cf8 100%);
+      box-shadow: 0 4px 18px rgba(217, 70, 239, 0.45);
       color: #ffffff;
     }
     .btn-magic-secondary {
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.85);
       border: 1.5px solid #c084fc;
       color: #7e22ce;
     }
-    /* 日系選單卡片 */
     .option-card {
       background: rgba(255, 255, 255, 0.85);
       border: 1px solid #f0abfc;
@@ -46,7 +47,7 @@
     .option-card:hover, .option-card.active {
       background: #fae8ff;
       border-color: #c084fc;
-      box-shadow: 0 0 10px rgba(192, 132, 252, 0.4);
+      box-shadow: 0 0 12px rgba(192, 132, 252, 0.45);
     }
     input, select, textarea {
       max-width: 100%;
@@ -61,17 +62,17 @@
       <!-- 頂部 Header LOGO 區 -->
       <div class="text-center mb-4 relative">
         <div class="flex items-center justify-center gap-2">
-          <div class="w-8 h-8 rounded-full border border-purple-300 flex items-center justify-center text-xs font-bold text-purple-600 bg-white/80 shadow-sm">
+          <div class="w-8 h-8 rounded-full border border-pink-300 flex items-center justify-center text-xs font-bold text-pink-600 bg-white/90 shadow-sm">
             L
           </div>
           <div>
-            <span class="text-xs text-purple-400 font-light tracking-widest block">Lily莉莉の預約系統</span>
+            <span class="text-[11px] text-purple-400 font-light tracking-widest block">Lily莉莉の預約系統</span>
             <h1 id="header-title" class="text-lg font-bold text-purple-900 tracking-wide">首頁</h1>
           </div>
         </div>
       </div>
 
-      <!-- 進度條 (日系圓圈標記) -->
+      <!-- 進度條 -->
       <div id="progress-bar" class="hidden mb-5">
         <div id="step-dots" class="flex gap-1 w-full justify-between items-center px-2"></div>
       </div>
