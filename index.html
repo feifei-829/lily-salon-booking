@@ -26,39 +26,37 @@
       box-sizing: border-box;
     }
 
-    /* 隱藏與顯示頁面切換 */
-    .page {
+    .step-section {
       display: none;
     }
-    .page.active {
+    .step-section.active {
       display: block;
     }
 
-    /* 頂部 Header 區塊 */
+    /* 頂部 Header：完美對齊與白色光暈 */
     .header {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 16px;
+      gap: 15px;
       margin-top: 10px;
       margin-bottom: 24px;
     }
 
     .logo-img {
-      width: 130px;
-      height: 130px;
+      width: 110px;
+      height: 110px;
       object-fit: contain;
-      filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 4px rgba(255, 255, 255, 0.6));
+      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 4px rgba(255, 255, 255, 0.8));
     }
 
     .wordmark-img {
-      width: 220px;
+      width: 200px;
       height: auto;
       object-fit: contain;
-      filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 4px rgba(255, 255, 255, 0.6));
+      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 4px rgba(255, 255, 255, 0.8));
     }
 
-    /* 上方功能卡片 (填寫預約 / 查詢改期) */
     .grid-buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -67,19 +65,20 @@
     }
 
     .card {
-      background: rgba(255, 255, 255, 0.75);
+      background: rgba(255, 255, 255, 0.85);
       border: 1px solid #f0d5e5;
       border-radius: 16px;
-      padding: 16px 12px;
+      padding: 18px 12px;
       text-align: center;
-      box-shadow: 0 4px 12px rgba(220, 190, 210, 0.2);
+      box-shadow: 0 4px 12px rgba(220, 190, 210, 0.25);
       cursor: pointer;
     }
 
     .card h3 {
       font-size: 15px;
-      margin: 8px 0 6px 0;
+      margin: 0 0 6px 0;
       color: #4a2e4b;
+      pointer-events: none;
     }
 
     .card p {
@@ -87,11 +86,11 @@
       color: #8c738f;
       line-height: 1.4;
       margin: 0;
+      pointer-events: none;
     }
 
-    /* 設計師介紹區塊 */
     .profile-card {
-      background: rgba(255, 255, 255, 0.75);
+      background: rgba(255, 255, 255, 0.85);
       border: 1px solid #f0d5e5;
       border-radius: 20px;
       padding: 18px;
@@ -123,9 +122,8 @@
       margin: 0;
     }
 
-    /* 店家資訊區塊 */
     .info-card {
-      background: rgba(255, 255, 255, 0.75);
+      background: rgba(255, 255, 255, 0.85);
       border: 1px solid #f0d5e5;
       border-radius: 20px;
       padding: 18px;
@@ -152,9 +150,8 @@
       margin-bottom: 0;
     }
 
-    /* 預約表單頁面樣式 */
     .form-card {
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.9);
       border: 1px solid #f0d5e5;
       border-radius: 20px;
       padding: 20px;
@@ -192,8 +189,13 @@
       color: #5c4362;
     }
 
-    .back-btn, .submit-btn {
-      width: 100%;
+    .btn-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .back-btn, .next-btn {
+      flex: 1;
       padding: 12px 0;
       border: none;
       border-radius: 25px;
@@ -203,7 +205,7 @@
       margin-top: 10px;
     }
 
-    .submit-btn {
+    .next-btn {
       background: linear-gradient(90deg, #d88eb1 0%, #a282b9 100%);
       color: #fff;
       box-shadow: 0 4px 15px rgba(180, 130, 170, 0.4);
@@ -219,27 +221,24 @@
 
   <div class="container">
 
-    <!-- 首頁 (Page 1) -->
-    <div id="home-page" class="page active">
-      <!-- 頂部 Header -->
+    <!-- 首頁 -->
+    <div id="step-home" class="step-section active">
       <div class="header">
         <img src="IMG_5345.png" alt="Logo" class="logo-img">
         <img src="IMG_5344.png" alt="Lily莉莉の預約系統" class="wordmark-img">
       </div>
 
-      <!-- 填寫與查詢卡片 -->
       <div class="grid-buttons">
-        <div class="card" onclick="switchPage('booking-page')">
+        <div class="card" onclick="goToStep('step-1')">
           <h3>填寫預約</h3>
           <p>第一次預約或重新填寫資料，從這裡開始。</p>
         </div>
-        <div class="card" onclick="switchPage('query-page')">
+        <div class="card" onclick="goToStep('step-query')">
           <h3>查詢 / 改期預約</h3>
           <p>查詢既有預約、申請改期或取消。</p>
         </div>
       </div>
 
-      <!-- 髮型師介紹 -->
       <div class="profile-card">
         <img src="IMG_5345.png" alt="Lily" class="profile-avatar">
         <div class="profile-content">
@@ -248,7 +247,6 @@
         </div>
       </div>
 
-      <!-- 店家資訊 -->
       <div class="info-card">
         <h2>店家資訊</h2>
         <div class="info-item">🏪 店家名稱：UNA尤拿・J9s 北勢店</div>
@@ -258,20 +256,26 @@
       </div>
     </div>
 
-    <!-- 填寫預約頁面 (Page 2) -->
-    <div id="booking-page" class="page">
+    <!-- 步驟 1：預約須知 -->
+    <div id="step-1" class="step-section">
       <div class="form-card">
-        <h2>填寫預約資料</h2>
+        <h2>步驟 1：預約須知</h2>
         <div class="form-group">
-          <label>您的姓名</label>
-          <input type="text" placeholder="請輸入真實姓名">
+          <p style="font-size: 12px; line-height: 1.6; color: #6d5572;">歡迎來到 Lily 預約系統！為維護服務品質與權益，請詳細閱讀相關注意事項後再進行填寫。</p>
         </div>
-        <div class="form-group">
-          <label>連絡電話</label>
-          <input type="tel" placeholder="09xx-xxxxxx">
+        <div class="btn-group">
+          <button class="back-btn" onclick="goToStep('step-home')">返回首頁</button>
+          <button class="next-btn" onclick="goToStep('step-2')">同意並下一步</button>
         </div>
+      </div>
+    </div>
+
+    <!-- 步驟 2：服務項目選取 -->
+    <div id="step-2" class="step-section">
+      <div class="form-card">
+        <h2>步驟 2：選擇服務項目</h2>
         <div class="form-group">
-          <label>預約項目</label>
+          <label>主項目</label>
           <select>
             <option>精緻剪髮</option>
             <option>質感染髮</option>
@@ -279,30 +283,139 @@
             <option>日系燙髮</option>
           </select>
         </div>
-        <button class="submit-btn">確認送出預約</button>
-        <button class="back-btn" onclick="switchPage('home-page')">返回首頁</button>
+        <div class="btn-group">
+          <button class="back-btn" onclick="goToStep('step-1')">上一步</button>
+          <button class="next-btn" onclick="goToStep('step-3')">下一步</button>
+        </div>
       </div>
     </div>
 
-    <!-- 查詢/改期頁面 (Page 3) -->
-    <div id="query-page" class="page">
+    <!-- 步驟 3：日期與時段規劃 -->
+    <div id="step-3" class="step-section">
+      <div class="form-card">
+        <h2>步驟 3：選擇日期與時段</h2>
+        <div class="form-group">
+          <label>預約日期</label>
+          <input type="date">
+        </div>
+        <div class="form-group">
+          <label>預約時段</label>
+          <select>
+            <option>11:00</option>
+            <option>13:30</option>
+            <option>16:00</option>
+          </select>
+        </div>
+        <div class="btn-group">
+          <button class="back-btn" onclick="goToStep('step-2')">上一步</button>
+          <button class="next-btn" onclick="goToStep('step-4')">下一步</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 步驟 4：客戶基本資料 -->
+    <div id="step-4" class="step-section">
+      <div class="form-card">
+        <h2>步驟 4：客戶基本資料</h2>
+        <div class="form-group">
+          <label>姓名</label>
+          <input type="text" placeholder="請輸入真實姓名">
+        </div>
+        <div class="form-group">
+          <label>電話</label>
+          <input type="tel" placeholder="09xx-xxxxxx">
+        </div>
+        <div class="btn-group">
+          <button class="back-btn" onclick="goToStep('step-3')">上一步</button>
+          <button class="next-btn" onclick="goToStep('step-5')">下一步</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 步驟 5：髮況詳細資訊 -->
+    <div id="step-5" class="step-section">
+      <div class="form-card">
+        <h2>步驟 5：髮況詳細資訊</h2>
+        <div class="form-group">
+          <label>目前髮況 / 幾個月內是否有燙染</label>
+          <textarea rows="3" placeholder="例如：半年前有燙過，髮尾較乾燥"></textarea>
+        </div>
+        <div class="btn-group">
+          <button class="back-btn" onclick="goToStep('step-4')">上一步</button>
+          <button class="next-btn" onclick="goToStep('step-6')">下一步</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 步驟 6：照片上傳 -->
+    <div id="step-6" class="step-section">
+      <div class="form-card">
+        <h2>步驟 6：照片上傳</h2>
+        <div class="form-group">
+          <label>上傳目前髮況照片或目標造型</label>
+          <input type="file">
+        </div>
+        <div class="btn-group">
+          <button class="back-btn" onclick="goToStep('step-5')">上一步</button>
+          <button class="next-btn" onclick="goToStep('step-7')">下一步</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 步驟 7：個人偏好設定 -->
+    <div id="step-7" class="step-section">
+      <div class="form-card">
+        <h2>步驟 7：個人偏好設定</h2>
+        <div class="form-group">
+          <label>服務過程中偏好的互動方式</label>
+          <select>
+            <option>喜歡安靜休息，滑手機/睡覺</option>
+            <option>喜歡聊天交流</option>
+            <option>隨意都可以</option>
+          </select>
+        </div>
+        <div class="btn-group">
+          <button class="back-btn" onclick="goToStep('step-6')">上一步</button>
+          <button class="next-btn" onclick="goToStep('step-8')">下一步</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 步驟 8：預約確認 -->
+    <div id="step-8" class="step-section">
+      <div class="form-card">
+        <h2>步驟 8：預約確認</h2>
+        <div class="form-group">
+          <p style="font-size: 12px; line-height: 1.6; color: #6d5572;">請確認以上填寫資訊無誤，點擊確認送出後即完成預約登記！</p>
+        </div>
+        <div class="btn-group">
+          <button class="back-btn" onclick="goToStep('step-7')">上一步</button>
+          <button class="next-btn" onclick="goToStep('step-home')">確認送出預約</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 查詢 / 改期頁面 -->
+    <div id="step-query" class="step-section">
       <div class="form-card">
         <h2>查詢 / 改期預約</h2>
         <div class="form-group">
-          <label>請輸入您的連絡電話</label>
-          <input type="tel" placeholder="輸入預約時的電話號碼">
+          <label>連絡電話</label>
+          <input type="tel" placeholder="輸入預約電話">
         </div>
-        <button class="submit-btn">查詢預約記錄</button>
-        <button class="back-btn" onclick="switchPage('home-page')">返回首頁</button>
+        <div class="btn-group">
+          <button class="back-btn" onclick="goToStep('step-home')">返回首頁</button>
+          <button class="next-btn">查詢記錄</button>
+        </div>
       </div>
     </div>
 
   </div>
 
   <script>
-    function switchPage(pageId) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById(pageId).classList.add('active');
+    function goToStep(stepId) {
+      document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+      document.getElementById(stepId).classList.add('active');
       window.scrollTo(0, 0);
     }
   </script>
