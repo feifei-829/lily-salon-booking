@@ -26,6 +26,14 @@
       box-sizing: border-box;
     }
 
+    /* 隱藏與顯示頁面切換 */
+    .page {
+      display: none;
+    }
+    .page.active {
+      display: block;
+    }
+
     /* 頂部 Header 區塊 */
     .header {
       display: flex;
@@ -121,7 +129,7 @@
       border: 1px solid #f0d5e5;
       border-radius: 20px;
       padding: 18px;
-      margin-bottom: 0;
+      margin-bottom: 20px;
     }
 
     .info-card h2 {
@@ -143,47 +151,161 @@
     .info-item:last-child {
       margin-bottom: 0;
     }
+
+    /* 預約表單頁面樣式 */
+    .form-card {
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid #f0d5e5;
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .form-card h2 {
+      font-size: 16px;
+      color: #4a2e4b;
+      margin-top: 0;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      color: #5c4362;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #f0d5e5;
+      border-radius: 10px;
+      box-sizing: border-box;
+      font-size: 12px;
+      background: #fff;
+      color: #5c4362;
+    }
+
+    .back-btn, .submit-btn {
+      width: 100%;
+      padding: 12px 0;
+      border: none;
+      border-radius: 25px;
+      font-size: 15px;
+      cursor: pointer;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .submit-btn {
+      background: linear-gradient(90deg, #d88eb1 0%, #a282b9 100%);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(180, 130, 170, 0.4);
+    }
+
+    .back-btn {
+      background: #e8d7e0;
+      color: #5c4362;
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <!-- 頂部 Header -->
-    <div class="header">
-      <img src="IMG_5345.png" alt="Logo" class="logo-img">
-      <img src="IMG_5344.png" alt="Lily莉莉の預約系統" class="wordmark-img">
+
+    <!-- 首頁 (Page 1) -->
+    <div id="home-page" class="page active">
+      <!-- 頂部 Header -->
+      <div class="header">
+        <img src="IMG_5345.png" alt="Logo" class="logo-img">
+        <img src="IMG_5344.png" alt="Lily莉莉の預約系統" class="wordmark-img">
+      </div>
+
+      <!-- 填寫與查詢卡片 -->
+      <div class="grid-buttons">
+        <div class="card" onclick="switchPage('booking-page')">
+          <h3>填寫預約</h3>
+          <p>第一次預約或重新填寫資料，從這裡開始。</p>
+        </div>
+        <div class="card" onclick="switchPage('query-page')">
+          <h3>查詢 / 改期預約</h3>
+          <p>查詢既有預約、申請改期或取消。</p>
+        </div>
+      </div>
+
+      <!-- 髮型師介紹 -->
+      <div class="profile-card">
+        <img src="IMG_5345.png" alt="Lily" class="profile-avatar">
+        <div class="profile-content">
+          <h2>146cm の小隻髮型師 ♡</h2>
+          <p>用細心與耐心，根據你的臉型、髮質與生活習慣，搭配色彩分析，設計真正適合你的髮型。</p>
+        </div>
+      </div>
+
+      <!-- 店家資訊 -->
+      <div class="info-card">
+        <h2>店家資訊</h2>
+        <div class="info-item">🏪 店家名稱：UNA尤拿・J9s 北勢店</div>
+        <div class="info-item">📍 店家地址：台中市沙鹿區北勢東路309號</div>
+        <div class="info-item">🕒 營業時間：11:00–19:30</div>
+        <div class="info-item">📸 Instagram：@una_j9s_lily</div>
+      </div>
     </div>
 
-    <!-- 填寫與查詢卡片 -->
-    <div class="grid-buttons">
-      <div class="card">
-        <h3>填寫預約</h3>
-        <p>第一次預約或重新填寫資料，從這裡開始。</p>
-      </div>
-      <div class="card">
-        <h3>查詢 / 改期預約</h3>
-        <p>查詢既有預約、申請改期或取消。</p>
+    <!-- 填寫預約頁面 (Page 2) -->
+    <div id="booking-page" class="page">
+      <div class="form-card">
+        <h2>填寫預約資料</h2>
+        <div class="form-group">
+          <label>您的姓名</label>
+          <input type="text" placeholder="請輸入真實姓名">
+        </div>
+        <div class="form-group">
+          <label>連絡電話</label>
+          <input type="tel" placeholder="09xx-xxxxxx">
+        </div>
+        <div class="form-group">
+          <label>預約項目</label>
+          <select>
+            <option>精緻剪髮</option>
+            <option>質感染髮</option>
+            <option>線條染 / 挑染</option>
+            <option>日系燙髮</option>
+          </select>
+        </div>
+        <button class="submit-btn">確認送出預約</button>
+        <button class="back-btn" onclick="switchPage('home-page')">返回首頁</button>
       </div>
     </div>
 
-    <!-- 髮型師介紹 -->
-    <div class="profile-card">
-      <img src="IMG_5345.png" alt="Lily" class="profile-avatar">
-      <div class="profile-content">
-        <h2>146cm の小隻髮型師 ♡</h2>
-        <p>用細心與耐心，根據你的臉型、髮質與生活習慣，搭配色彩分析，設計真正適合你的髮型。</p>
+    <!-- 查詢/改期頁面 (Page 3) -->
+    <div id="query-page" class="page">
+      <div class="form-card">
+        <h2>查詢 / 改期預約</h2>
+        <div class="form-group">
+          <label>請輸入您的連絡電話</label>
+          <input type="tel" placeholder="輸入預約時的電話號碼">
+        </div>
+        <button class="submit-btn">查詢預約記錄</button>
+        <button class="back-btn" onclick="switchPage('home-page')">返回首頁</button>
       </div>
     </div>
 
-    <!-- 店家資訊 -->
-    <div class="info-card">
-      <h2>店家資訊</h2>
-      <div class="info-item">🏪 店家名稱：UNA尤拿・J9s 北勢店</div>
-      <div class="info-item">📍 店家地址：台中市沙鹿區北勢東路309號</div>
-      <div class="info-item">🕒 營業時間：11:00–19:30</div>
-      <div class="info-item">📸 Instagram：@una_j9s_lily</div>
-    </div>
   </div>
+
+  <script>
+    function switchPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      window.scrollTo(0, 0);
+    }
+  </script>
 
 </body>
 </html>
