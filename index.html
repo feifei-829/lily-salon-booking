@@ -4,7 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lily莉莉の預約系統</title>
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
+    :root {
+      --primary-color: #d88eb1;
+      --secondary-color: #a282b9;
+      --text-main: #4a2e4b;
+      --text-sub: #6d5572;
+      --card-bg: rgba(255, 255, 255, 0.85);
+      --border-color: #f0d5e5;
+    }
+
     body {
       margin: 0;
       padding: 0;
@@ -13,19 +24,21 @@
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
+      background-attachment: fixed;
       display: flex;
       justify-content: center;
       min-height: 100vh;
-      color: #5c4362;
+      color: var(--text-main);
     }
 
     .container {
       width: 100%;
       max-width: 414px;
-      padding: 24px 16px 40px 16px;
+      padding: 20px 16px 40px 16px;
       box-sizing: border-box;
     }
 
+    /* 步驟切換控制 */
     .step-section {
       display: none;
     }
@@ -33,30 +46,31 @@
       display: block;
     }
 
-    /* 頂部 Header：完美對齊與白色光暈 */
+    /* 頂部 Header：精準垂直置中、大尺寸 Logo 與白色強光暈 */
     .header {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 15px;
+      gap: 12px;
       margin-top: 10px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .logo-img {
-      width: 110px;
-      height: 110px;
+      width: 130px;
+      height: 130px;
       object-fit: contain;
-      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 4px rgba(255, 255, 255, 0.8));
+      filter: drop-shadow(0 0 12px #ffffff) drop-shadow(0 0 6px #ffffff) drop-shadow(0 0 2px #ffffff);
     }
 
     .wordmark-img {
-      width: 200px;
+      width: 210px;
       height: auto;
       object-fit: contain;
-      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 4px rgba(255, 255, 255, 0.8));
+      filter: drop-shadow(0 0 12px #ffffff) drop-shadow(0 0 6px #ffffff) drop-shadow(0 0 2px #ffffff);
     }
 
+    /* 首頁按鈕卡片區塊 */
     .grid-buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -65,20 +79,24 @@
     }
 
     .card {
-      background: rgba(255, 255, 255, 0.85);
-      border: 1px solid #f0d5e5;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
       border-radius: 16px;
-      padding: 18px 12px;
+      padding: 16px 12px;
       text-align: center;
       box-shadow: 0 4px 12px rgba(220, 190, 210, 0.25);
       cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .card:active {
+      transform: scale(0.98);
     }
 
     .card h3 {
       font-size: 15px;
       margin: 0 0 6px 0;
-      color: #4a2e4b;
-      pointer-events: none;
+      color: var(--text-main);
     }
 
     .card p {
@@ -86,23 +104,27 @@
       color: #8c738f;
       line-height: 1.4;
       margin: 0;
-      pointer-events: none;
     }
 
-    .profile-card {
-      background: rgba(255, 255, 255, 0.85);
-      border: 1px solid #f0d5e5;
+    /* 設計師介紹與資訊卡片 */
+    .profile-card, .info-card, .form-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
       border-radius: 20px;
       padding: 18px;
       margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(220, 190, 210, 0.2);
+    }
+
+    .profile-card {
       display: flex;
       align-items: center;
       gap: 16px;
     }
 
     .profile-avatar {
-      width: 85px;
-      height: 85px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       object-fit: cover;
       border: 2px solid #e8c4d8;
@@ -112,86 +134,77 @@
     .profile-content h2 {
       font-size: 15px;
       margin: 0 0 6px 0;
-      color: #4a2e4b;
+      color: var(--text-main);
     }
 
     .profile-content p {
-      font-size: 11px;
-      color: #6d5572;
+      font-size: 11.5px;
+      color: var(--text-sub);
       line-height: 1.5;
       margin: 0;
     }
 
-    .info-card {
-      background: rgba(255, 255, 255, 0.85);
-      border: 1px solid #f0d5e5;
-      border-radius: 20px;
-      padding: 18px;
-      margin-bottom: 20px;
-    }
-
-    .info-card h2 {
-      font-size: 15px;
+    .info-card h2, .form-card h2 {
+      font-size: 16px;
       text-align: center;
       margin: 0 0 14px 0;
-      color: #4a2e4b;
+      color: var(--text-main);
     }
 
     .info-item {
       font-size: 12px;
-      color: #6d5572;
+      color: var(--text-sub);
       margin-bottom: 10px;
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .info-item:last-child {
-      margin-bottom: 0;
-    }
-
-    .form-card {
-      background: rgba(255, 255, 255, 0.9);
-      border: 1px solid #f0d5e5;
-      border-radius: 20px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-
-    .form-card h2 {
-      font-size: 16px;
-      color: #4a2e4b;
-      margin-top: 0;
-      margin-bottom: 15px;
-      text-align: center;
-    }
-
+    /* 表單組件樣式 */
     .form-group {
-      margin-bottom: 15px;
+      margin-bottom: 16px;
     }
 
     .form-group label {
       display: block;
       font-size: 12px;
-      color: #5c4362;
-      margin-bottom: 5px;
+      color: var(--text-main);
+      margin-bottom: 6px;
       font-weight: bold;
     }
 
     .form-group input, .form-group select, .form-group textarea {
       width: 100%;
-      padding: 10px;
-      border: 1px solid #f0d5e5;
+      padding: 11px;
+      border: 1px solid var(--border-color);
       border-radius: 10px;
       box-sizing: border-box;
-      font-size: 12px;
-      background: #fff;
-      color: #5c4362;
+      font-size: 12.5px;
+      background: #ffffff;
+      color: var(--text-main);
+      outline: none;
     }
 
+    .radio-group, .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .radio-label, .checkbox-label {
+      font-size: 12px;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    /* 按鈕控制 */
     .btn-group {
       display: flex;
       gap: 10px;
+      margin-top: 20px;
     }
 
     .back-btn, .next-btn {
@@ -199,21 +212,30 @@
       padding: 12px 0;
       border: none;
       border-radius: 25px;
-      font-size: 15px;
+      font-size: 14px;
+      font-weight: bold;
       cursor: pointer;
       text-align: center;
-      margin-top: 10px;
     }
 
     .next-btn {
-      background: linear-gradient(90deg, #d88eb1 0%, #a282b9 100%);
-      color: #fff;
-      box-shadow: 0 4px 15px rgba(180, 130, 170, 0.4);
+      background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(180, 130, 170, 0.35);
     }
 
     .back-btn {
       background: #e8d7e0;
-      color: #5c4362;
+      color: var(--text-main);
+    }
+
+    .notice-box {
+      background: rgba(255, 255, 255, 0.6);
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 11.5px;
+      line-height: 1.6;
+      color: var(--text-sub);
     }
   </style>
 </head>
@@ -221,7 +243,7 @@
 
   <div class="container">
 
-    <!-- 首頁 -->
+    <!-- 步驟 0：系統首頁 -->
     <div id="step-home" class="step-section active">
       <div class="header">
         <img src="IMG_5345.png" alt="Logo" class="logo-img">
@@ -259,29 +281,43 @@
     <!-- 步驟 1：預約須知 -->
     <div id="step-1" class="step-section">
       <div class="form-card">
-        <h2>步驟 1：預約須知</h2>
-        <div class="form-group">
-          <p style="font-size: 12px; line-height: 1.6; color: #6d5572;">歡迎來到 Lily 預約系統！為維護服務品質與權益，請詳細閱讀相關注意事項後再進行填寫。</p>
+        <h2>步驟 1 / 8：預約須知</h2>
+        <div class="notice-box">
+          <p style="margin: 0 0 8px 0; font-weight: bold; color: var(--text-main);">♡ 預約前請詳閱以下事項 ♡</p>
+          <p style="margin: 0 0 6px 0;">1. 本店為「1人服務制」，為維護服務品質，請務必準時抵達。</p>
+          <p style="margin: 0 0 6px 0;">2. 遲到超過 15 分鐘者，將視現場狀況縮減服務項目或另約時間。</p>
+          <p style="margin: 0 0 6px 0;">3. 如需變更或取消預約，請於預約日前 2 天告知。</p>
+          <p style="margin: 0;">4. 填寫完成送出後，系統將自動為您保留時段並進行審核。</p>
         </div>
         <div class="btn-group">
           <button class="back-btn" onclick="goToStep('step-home')">返回首頁</button>
-          <button class="next-btn" onclick="goToStep('step-2')">同意並下一步</button>
+          <button class="next-btn" onclick="goToStep('step-2')">我已閱讀並同意</button>
         </div>
       </div>
     </div>
 
-    <!-- 步驟 2：服務項目選取 -->
+    <!-- 步驟 2：選擇服務項目 -->
     <div id="step-2" class="step-section">
       <div class="form-card">
-        <h2>步驟 2：選擇服務項目</h2>
+        <h2>步驟 2 / 8：選擇服務項目</h2>
         <div class="form-group">
-          <label>主項目</label>
-          <select>
-            <option>精緻剪髮</option>
-            <option>質感染髮</option>
-            <option>線條染 / 挑染</option>
-            <option>日系燙髮</option>
+          <label>主要服務項目</label>
+          <select id="main-service">
+            <option value="">請選擇預約項目</option>
+            <option value="精緻剪髮">精緻剪髮</option>
+            <option value="質感染髮">質感染髮</option>
+            <option value="設計染髮/挑染">設計染髮 / 挑染</option>
+            <option value="日系燙髮">日系燙髮</option>
+            <option value="護髮/頭皮護理">護髮 / 頭皮護理</option>
           </select>
+        </div>
+        <div class="form-group">
+          <label>加購/加做項目（可多選）</label>
+          <div class="checkbox-group">
+            <label class="checkbox-label"><input type="checkbox" name="addon" value="結構式護髮"> 結構式深層護髮</label>
+            <label class="checkbox-label"><input type="checkbox" name="addon" value="頭皮紓壓Spa"> 頭皮紓壓 Spa</label>
+            <label class="checkbox-label"><input type="checkbox" name="addon" value="瀏海局部燙/剪"> 瀏海局部燙 / 剪</label>
+          </div>
         </div>
         <div class="btn-group">
           <button class="back-btn" onclick="goToStep('step-1')">上一步</button>
@@ -293,17 +329,19 @@
     <!-- 步驟 3：日期與時段規劃 -->
     <div id="step-3" class="step-section">
       <div class="form-card">
-        <h2>步驟 3：選擇日期與時段</h2>
+        <h2>步驟 3 / 8：選擇日期與時段</h2>
         <div class="form-group">
-          <label>預約日期</label>
-          <input type="date">
+          <label>希望預約日期</label>
+          <input type="date" id="booking-date">
         </div>
         <div class="form-group">
-          <label>預約時段</label>
-          <select>
-            <option>11:00</option>
-            <option>13:30</option>
-            <option>16:00</option>
+          <label>預約時段（一人服務制開放時段）</label>
+          <select id="booking-time">
+            <option value="">請選擇時段</option>
+            <option value="11:00">11:00</option>
+            <option value="13:30">13:30</option>
+            <option value="16:00">16:00</option>
+            <option value="18:00">18:00</option>
           </select>
         </div>
         <div class="btn-group">
@@ -316,14 +354,18 @@
     <!-- 步驟 4：客戶基本資料 -->
     <div id="step-4" class="step-section">
       <div class="form-card">
-        <h2>步驟 4：客戶基本資料</h2>
+        <h2>步驟 4 / 8：個人基本資料</h2>
         <div class="form-group">
-          <label>姓名</label>
-          <input type="text" placeholder="請輸入真實姓名">
+          <label>真實姓名</label>
+          <input type="text" id="cust-name" placeholder="請輸入姓名">
         </div>
         <div class="form-group">
-          <label>電話</label>
-          <input type="tel" placeholder="09xx-xxxxxx">
+          <label>連絡電話</label>
+          <input type="tel" id="cust-phone" placeholder="09xx-xxxxxx">
+        </div>
+        <div class="form-group">
+          <label>LINE ID（方便後續聯繫確認）</label>
+          <input type="text" id="cust-line" placeholder="請輸入 LINE ID">
         </div>
         <div class="btn-group">
           <button class="back-btn" onclick="goToStep('step-3')">上一步</button>
@@ -332,13 +374,22 @@
       </div>
     </div>
 
-    <!-- 步驟 5：髮況詳細資訊 -->
+    <!-- 步驟 5：髮況詳細調查 -->
     <div id="step-5" class="step-section">
       <div class="form-card">
-        <h2>步驟 5：髮況詳細資訊</h2>
+        <h2>步驟 5 / 8：髮況詳細調查</h2>
         <div class="form-group">
-          <label>目前髮況 / 幾個月內是否有燙染</label>
-          <textarea rows="3" placeholder="例如：半年前有燙過，髮尾較乾燥"></textarea>
+          <label>半年內是否有染黑、漂髮、燙髮或泡泡染？</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="hair-history" value="無歷史紀錄"> 無以上紀錄，髮質良好</label>
+            <label class="radio-label"><input type="radio" name="hair-history" value="有漂髮"> 有漂髮過</label>
+            <label class="radio-label"><input type="radio" name="hair-history" value="有染黑/DIY泡泡染"> 有自行染黑 / 使用過泡泡染</label>
+            <label class="radio-label"><input type="radio" name="hair-history" value="有縮毛矯正/燙髮"> 有做過縮毛矯正或燙髮</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>目前困擾或欲改善之髮況描述</label>
+          <textarea id="hair-remark" rows="3" placeholder="例如：毛躁、易扁塌、頭皮容易出油..."></textarea>
         </div>
         <div class="btn-group">
           <button class="back-btn" onclick="goToStep('step-4')">上一步</button>
@@ -350,10 +401,14 @@
     <!-- 步驟 6：照片上傳 -->
     <div id="step-6" class="step-section">
       <div class="form-card">
-        <h2>步驟 6：照片上傳</h2>
+        <h2>步驟 6 / 8：照片上傳 (Supabase)</h2>
         <div class="form-group">
-          <label>上傳目前髮況照片或目標造型</label>
-          <input type="file">
+          <label>上傳目前髮況正面/背面照片</label>
+          <input type="file" id="current-hair-photo" accept="image/*">
+        </div>
+        <div class="form-group">
+          <label>上傳期望造型參考圖（選填）</label>
+          <input type="file" id="target-hair-photo" accept="image/*">
         </div>
         <div class="btn-group">
           <button class="back-btn" onclick="goToStep('step-5')">上一步</button>
@@ -365,14 +420,14 @@
     <!-- 步驟 7：個人偏好設定 -->
     <div id="step-7" class="step-section">
       <div class="form-card">
-        <h2>步驟 7：個人偏好設定</h2>
+        <h2>步驟 7 / 8：個人服務偏好</h2>
         <div class="form-group">
           <label>服務過程中偏好的互動方式</label>
-          <select>
-            <option>喜歡安靜休息，滑手機/睡覺</option>
-            <option>喜歡聊天交流</option>
-            <option>隨意都可以</option>
-          </select>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="preference" value="安靜休息"> 喜歡安靜休息、滑手機或閉目養神</label>
+            <label class="radio-label"><input type="radio" name="preference" value="輕鬆聊天"> 喜歡輕鬆聊天交流，分享髮型知識</label>
+            <label class="radio-label"><input type="radio" name="preference" value="隨意"> 隨意，視當下狀況即可</label>
+          </div>
         </div>
         <div class="btn-group">
           <button class="back-btn" onclick="goToStep('step-6')">上一步</button>
@@ -381,27 +436,28 @@
       </div>
     </div>
 
-    <!-- 步驟 8：預約確認 -->
+    <!-- 步驟 8：預約確認與送出 -->
     <div id="step-8" class="step-section">
       <div class="form-card">
-        <h2>步驟 8：預約確認</h2>
-        <div class="form-group">
-          <p style="font-size: 12px; line-height: 1.6; color: #6d5572;">請確認以上填寫資訊無誤，點擊確認送出後即完成預約登記！</p>
+        <h2>步驟 8 / 8：最終預約確認</h2>
+        <div class="notice-box" style="margin-bottom: 16px;">
+          <p style="margin: 0 0 6px 0; text-align: center; font-weight: bold;">請確認您的預約資訊</p>
+          <p style="margin: 0; text-align: center;">點擊下方按鈕後，資料將傳送至後台進行預約登記。</p>
         </div>
         <div class="btn-group">
           <button class="back-btn" onclick="goToStep('step-7')">上一步</button>
-          <button class="next-btn" onclick="goToStep('step-home')">確認送出預約</button>
+          <button class="next-btn" onclick="submitBooking()">確認送出預約</button>
         </div>
       </div>
     </div>
 
-    <!-- 查詢 / 改期頁面 -->
+    <!-- 獨立區塊：查詢 / 改期頁面 -->
     <div id="step-query" class="step-section">
       <div class="form-card">
         <h2>查詢 / 改期預約</h2>
         <div class="form-group">
-          <label>連絡電話</label>
-          <input type="tel" placeholder="輸入預約電話">
+          <label>請輸入預約時填寫的電話號碼</label>
+          <input type="tel" placeholder="09xx-xxxxxx">
         </div>
         <div class="btn-group">
           <button class="back-btn" onclick="goToStep('step-home')">返回首頁</button>
@@ -413,10 +469,27 @@
   </div>
 
   <script>
+    // Supabase 初始化設定 (依先前配置)
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // 步驟分頁控制邏輯
     function goToStep(stepId) {
-      document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
-      document.getElementById(stepId).classList.add('active');
-      window.scrollTo(0, 0);
+      document.querySelectorAll('.step-section').forEach(section => {
+        section.classList.remove('active');
+      });
+      const target = document.getElementById(stepId);
+      if (target) {
+        target.classList.add('active');
+        window.scrollTo(0, 0);
+      }
+    }
+
+    // 表單送出邏輯
+    async function submitBooking() {
+      alert('預約已送出！感謝您的填寫。');
+      goToStep('step-home');
     }
   </script>
 
